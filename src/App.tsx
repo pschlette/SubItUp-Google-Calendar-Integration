@@ -107,22 +107,26 @@ function App() {
     if (SubItUpEvents.length === 0) {
       return (
         <Grid>
-          <CircularProgress isIndeterminate color='green.300' />
+          <Center>
+            <CircularProgress isIndeterminate color='green.300' />
+          </Center>
           <Text fontSize='2xl'>Please Navigate to SubItUp.com, log-in, refresh the page, and re-open the extension.</Text>
         </Grid>
       )
     }
 
-    const submitButton = <Button colorScheme='blue' onClick={addToGoogleCalendar}>
-      <Grid>
-        <Text fontSize='2xl'>
-          Add To Google Calendar
-        </Text>
-        <Text fontSize='xs'>
-          {"(Failure will result in having to re-login.)"}
-        </Text>
-      </Grid>
-    </Button>
+    const submitButton = <Box>
+      <Button colorScheme='blue' onClick={addToGoogleCalendar}>
+        <Grid>
+          <Text fontSize='2xl'>
+            Add To Google Calendar
+          </Text>
+        </Grid>
+      </Button>
+      <Text fontSize='xs'>
+        {"Failure will indicate having to re-login. (AccessToken Expired)"}
+      </Text>
+    </Box>
 
     const logoutButton = <Button colorScheme='red' onClick={logOut}>Logout</Button>
 
