@@ -1,0 +1,31 @@
+{
+    "version": "1.0.0",
+    "manifest_version": 3,
+    "name": "SubItUp Google Calendar Integration",
+    "action": {
+        "default_popup": "js/index.html",
+        "default_title": "SubItUp Google Calendar Integration"
+    },
+    "background": {
+        "service_worker": "service-worker.js"
+    },
+    "permissions": [
+        "identity",
+        "storage",
+        "cookies",
+        "activeTab",
+        "tabs",
+        "offscreen",
+        "webRequest"
+    ],
+    "host_permissions": [
+        "https://*.subitup.com/*"
+    ],
+    "oauth2": {
+        "client_id": "697110159929-i30ffolpoibqjnh7837si3u6paa6uieq.apps.googleusercontent.com",
+        "scopes": [
+            "https://www.googleapis.com/auth/calendar"
+        ],
+        "response_type": "token"
+    }
+}
