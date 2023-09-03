@@ -104,6 +104,7 @@ function App() {
     .map((shift) => shift['shiftid']));
 
   const shiftsList = () => {
+    const logoutButton = <Button colorScheme='red' onClick={logOut}>Logout</Button>
     if (SubItUpEvents.length === 0) {
       return (
         <Grid>
@@ -111,6 +112,7 @@ function App() {
             <CircularProgress isIndeterminate color='green.300' />
           </Center>
           <Text fontSize='2xl'>Please Navigate to SubItUp.com, log-in, refresh the page, and re-open the extension.</Text>
+          {logoutButton}
         </Grid>
       )
     }
@@ -128,7 +130,6 @@ function App() {
       </Text>
     </Box>
 
-    const logoutButton = <Button colorScheme='red' onClick={logOut}>Logout</Button>
 
     function parseDateString(dateStr: string) {
       const [datePart, timePart] = dateStr.split(' ');
