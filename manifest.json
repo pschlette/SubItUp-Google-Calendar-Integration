@@ -2,6 +2,7 @@
     "version": "1.0.0",
     "manifest_version": 3,
     "name": "SubItUp Google Calendar Integration",
+    "description": "A simple chrome extension written in TypeScript/JavaScript with the intention of allowing the importation of SubItUp Shifts into Google Calendar.",
     "action": {
         "default_popup": "js/index.html",
         "default_title": "SubItUp Google Calendar Integration"

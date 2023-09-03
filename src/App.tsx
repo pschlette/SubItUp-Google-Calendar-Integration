@@ -156,6 +156,8 @@ function App() {
             <Card variant={(shift['addToGoogleCalendar']) ? 'elevated' : 'filled'}>
               <CardHeader>
                 <Checkbox
+                  size='lg'
+                  colorScheme='green'
                   defaultChecked={
                     false//shift['addToGoogleCalendar']
                   }
@@ -176,11 +178,6 @@ function App() {
                 <Stack>
                   <StackItem>
                     <ChevronRightIcon />{shift['Title']}<ChevronLeftIcon />
-                  </StackItem>
-                  <StackItem>
-                    <InfoOutlineIcon />
-                    {"  "}
-                    {shift['HelpfulInfo']}
                   </StackItem>
                   <StackItem>
                     <Box bg={(shift['addToGoogleCalendar']) ? 'green.100' : 'red.100'}>
@@ -216,7 +213,7 @@ function App() {
         <Box position='relative' padding='10'>
           <Divider />
           <AbsoluteCenter bg='white' px='4'>
-            Shifts
+            Shifts This Week
           </AbsoluteCenter>
         </Box>
 
