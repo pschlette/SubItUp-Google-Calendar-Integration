@@ -234,6 +234,7 @@ function App() {
   return (
     <div className="App">
       {MainApp()}
+      <Text>{"This extension was made By Christopher Kim (christopher.kim.1@stonybrook.edu)"}</Text>
     </div>
   );
 }
