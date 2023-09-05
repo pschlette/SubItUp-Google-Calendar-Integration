@@ -13,10 +13,6 @@
     "permissions": [
         "identity",
         "storage",
-        "cookies",
-        "activeTab",
-        "tabs",
-        "offscreen",
         "webRequest"
     ],
     "host_permissions": [

@@ -1,6 +1,6 @@
 /// <reference types="chrome"/>
 
-import { AbsoluteCenter, Accordion, Alert, AlertIcon, Box, Button, Card, CardBody, CardHeader, Center, Checkbox, CircularProgress, Divider, Flex, Grid, Spinner, Stack, StackItem, Text } from "@chakra-ui/react";
+import { AbsoluteCenter, Alert, AlertIcon, Box, Button, Card, CardBody, CardHeader, Center, Checkbox, CircularProgress, Divider, Flex, Grid, Spinner, Stack, StackItem, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { CalendarIcon, CheckIcon, ChevronLeftIcon, ChevronRightIcon, InfoOutlineIcon, MinusIcon, SmallCloseIcon, StarIcon } from '@chakra-ui/icons';
 import "./App.css"
