@@ -1,18 +1,104 @@
-A simple chrome extension written in TypeScript/Javascript and React to allow for importation of SubItUp shifts into Google Calendar. 
+<div align='center'>
 
-# To Get Started
+<h1>SubItUp Google Calendar Integration</h1>
+<p>A simple chrome extension written in TypeScript/Javascript and React to allow for importation of SubItUp shifts into Google Calendar.</p>
 
-### `npm install`
-To install all necessary dependencies.
+<h4> <span> · </span> <a href="https://github.com/chriskim2273/SubItUp-Google-Calendar-Integration/blob/master/README.md"> Documentation </a> <span> · </span> <a href="https://github.com/chriskim2273/SubItUp-Google-Calendar-Integration/issues"> Report Bug </a> <span> · </span> <a href="https://github.com/chriskim2273/SubItUp-Google-Calendar-Integration/issues"> Request Feature </a> </h4>
 
-then...
+<p align="center"><img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&amp;logo=javascript&amp;logoColor=black" alt="shields">     <img src="https://img.shields.io/badge/React-61DBFB?style=for-the-badge&logo=react&logoColor=61DBFB&labelColor=black" alt="shields">     <img src="https://img.shields.io/chrome-web-store/v/bpceepmanghbdihilafngmapgjmdfcek" alt="shields">    
+ <img src="https://img.shields.io/chrome-web-store/users/bpceepmanghbdihilafngmapgjmdfcek" alt="shields"> 
+    <img src="https://img.shields.io/chrome-web-store/rating/bpceepmanghbdihilafngmapgjmdfcek" alt="shields"></p></p> 
+</div>
 
-## Available Scripts
+# :notebook_with_decorative_cover: Table of Contents
 
-In the project directory, you can run:
+- [About the Project](#star2-about-the-project)
+- [Roadmap](#compass-roadmap)
+- [License](#warning-license)
+- [Contact](#handshake-contact)
 
-### `npm run build`
-bundle the extension.
 
-### `npm run watch`
-bundle the extension with interactive watch mode.
+## :star2: About the Project
+
+### :dart: Features
+- Login to Google Account with Calendar
+- Fetch all SubItUp Shifts
+- Pick which shifts you wish to load into your Google Calendar
+- Create Events in Google Calendar for all selected SubItUp shifts
+
+
+### :art: Color Reference
+| Color | Hex |
+| --------------- | ---------------------------------------------------------------- |
+| Secondary Color | ![#393E46](https://via.placeholder.com/10/393E46?text=+) #393E46 |
+| Accent Color | ![#00ADB5](https://via.placeholder.com/10/00ADB5?text=+) #00ADB5 |
+| Text Color | ![#EEEEEE](https://via.placeholder.com/10/EEEEEE?text=+) #EEEEEE |
+
+## :toolbox: Getting Started
+
+### :bangbang: Prerequisites
+
+- Install Node JS<a href="https://nodejs.org/en/"> Here</a>
+
+
+### :running: Run Locally
+
+Clone the project
+
+```bash
+https://github.com/chriskim2273/SubItUp-Google-Calendar-Integration
+```
+Go to the project directory
+```bash
+cd SubItUp-Google-Calendar-Integration
+```
+Install all dependencies
+```bash
+npm install
+```
+Bundle the Extension (build)
+```bash
+npm run build
+```
+Load Extension
+```bash
+Open Google Chrome, Go To Extensions, Enable Developer Mode, and press Load Unpacked Extension then select the build directory.
+```
+You can also bundle the extension with interactive watch mode.
+```bash
+npm run watch
+```
+
+
+## :compass: Roadmap
+
+* [x] Login to Google
+* [x] Fetch shifts from SubItUp
+* [x] List Shifts with details
+* [x] Ability to select shifts to load
+* [x] Load selected shifts into Google Calendar
+* [ ] Detect when Google Auth Key is no longer valid
+* [ ] Automatically Load user Shifts into Google Calendar
+
+
+## :wave: Contributing
+
+<a href="https://github.com/chriskim2273/SubItUp-Google-Calendar-Integration/graphs/contributors"> <img src="https://contrib.rocks/image?repo=Louis3797/awesome-readme-template" /> </a>
+
+Contributions are always welcome!
+
+see `contributing.md` for ways to get started
+
+### :scroll: Code of Conduct
+
+Please read the [Code of Conduct](https://github.com/chriskim2273/SubItUp-Google-Calendar-Integration/blob/master/CODE_OF_CONDUCT.md)
+
+## :warning: License
+
+Distributed under the no License. See LICENSE.txt for more information.
+
+## :handshake: Contact
+
+Christopher Kim - - Christopherkim2273@gmail.com
+
+Project Link: [https://github.com/chriskim2273/SubItUp-Google-Calendar-Integration](https://github.com/chriskim2273/SubItUp-Google-Calendar-Integration)
