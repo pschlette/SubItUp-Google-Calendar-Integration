@@ -75,15 +75,9 @@ npm run watch
 
 ## :wave: Contributing
 
-<a href="https://github.com/chriskim2273/SubItUp-Google-Calendar-Integration/graphs/contributors"> <img src="https://contrib.rocks/image?repo=Louis3797/awesome-readme-template" /> </a>
-
 Contributions are always welcome!
 
 see `contributing.md` for ways to get started
-
-### :scroll: Code of Conduct
-
-Please read the [Code of Conduct](https://github.com/chriskim2273/SubItUp-Google-Calendar-Integration/blob/master/CODE_OF_CONDUCT.md)
 
 ## :warning: License
 
