@@ -16,9 +16,14 @@ const testCreateEvent = () => {
 
 
 function App() {
+  const [refresh, setRefresh] = useState(false);
   const [accessToken, setAccessToken] = useState('');
   const [SubItUpEvents, setSubItUpEvents] = useState([]);
   const [uploadingEvents, setUploadingEvents] = useState(false);
+
+  const refreshExtension = () => {
+    setRefresh(!refresh);
+  }
 
   chrome.storage.local.get(null, function (data) {
     setAccessToken(data.accessToken);
@@ -39,6 +44,7 @@ function App() {
         setCheckedShifts([]);
       }
     });
+    refreshExtension();
   }
 
   chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
@@ -48,6 +54,9 @@ function App() {
       //  setAccessToken(message.token);
       //});
       logOut();
+    }
+    if (message.action == "accessTokenRetrieved") {
+      setAccessToken(message.accessToken);
     }
     if (message.action == 'startUploadingEvents') {
       setUploadingEvents(true);
@@ -60,7 +69,15 @@ function App() {
   const MainApp = () => {
 
     const authorizationButton =
-      <AbsoluteCenter axis='both'><Button onClick={handleAuthClick}>Log Into Google Calendar</Button></AbsoluteCenter>
+      <AbsoluteCenter axis='both'>
+        <Text fontSize='2xl'>
+          Once you login, please re-open the extension.
+        </Text>
+        <Button onClick={() => {
+          handleAuthClick();
+          refreshExtension();
+        }}>Log Into Google Calendar</Button>
+      </AbsoluteCenter>
 
     const test = <Button onClick={testCreateEvent}>Create Events</Button>
 
