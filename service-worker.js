@@ -116,6 +116,72 @@ const testCreateEvent = () => {
 
 }
 
+const getCalendarId = async (calendarName, accessToken) => {
+    const CALENDAR_LIST_URL = 'https://www.googleapis.com/calendar/v3/users/me/calendarList'
+    const CALENDARS_URL = 'https://www.googleapis.com/calendar/v3/calendars/'
+
+    const headers = {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+    };
+
+    let calendarId = await fetch(CALENDAR_LIST_URL, {
+        method: 'GET',
+        headers,
+    }).then((response) => {
+        if (!response.ok) {
+            if (response.status == 401) {
+                // Unauthorized, log the person out.
+                chrome.runtime.sendMessage({ action: 'loggedOut' });
+            }
+            throw new Error(`Failed to check for user's calendars. Status code: ${response.status}`);
+        }
+        return response.json();
+    })
+        .then((data) => {
+            let calendars = data?.items;
+            for (let calendar in calendars) {
+                if (calendar?.summary === calendarName) {
+                    return calendar.id;
+                }
+            }
+            return undefined;
+        })
+        .catch((error) => {
+            console.error('Error Retrieving Calendar:', error.message);
+            return undefined;
+        })
+    if (calendarId)
+        return calendarId;
+
+    let newCalendarData = {
+        'summary': calendarName,  // Customize the calendar name
+        'timeZone': 'America/New_York' // Should this be allowed to be set by the user?
+    }
+    calendarId = await fetch(CALENDARS_URL, {
+        method: 'POST',
+        headers: headers,
+        body: newCalendarData
+    }).then((response) => {
+        if (!response.ok) {
+            if (response.status == 401) {
+                // Unauthorized, log the person out.
+                chrome.runtime.sendMessage({ action: 'loggedOut' });
+            }
+            throw new Error(`Failed to create new calendar. Status code: ${response.status}`);
+        }
+        return response.json();
+    })
+        .then((data) => {
+            return data.id;
+        })
+        .catch((error) => {
+            console.error('Error Creating New Calendar', error.message);
+            return undefined;
+        })
+
+}
+
 const createShiftEvents = async (shiftIds, shiftData, accessToken) => {
     let shiftsToAddToCalendar = shiftData.filter((shift) => {
         let index = shiftIds.indexOf(shift['shiftid']);
