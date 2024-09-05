@@ -69,7 +69,7 @@ npm run watch
 * [x] List Shifts with details
 * [x] Ability to select shifts to load
 * [x] Load selected shifts into Google Calendar
-* [ ] Detect when Google Auth Key is no longer valid
+* [x] Detect when Google Auth Key is no longer valid
 * [ ] Automatically Load user Shifts into Google Calendar
 
 
