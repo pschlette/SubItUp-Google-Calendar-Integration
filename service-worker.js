@@ -180,9 +180,13 @@ const getCalendarId = async (calendarName, accessToken) => {
             return undefined;
         })
 
+    return calendarId;
 }
 
 const createShiftEvents = async (shiftIds, shiftData, accessToken) => {
+    // ADD THIS AS A PARAMETER
+    const calendarName = "SubItUp Shifts";
+
     let shiftsToAddToCalendar = shiftData.filter((shift) => {
         let index = shiftIds.indexOf(shift['shiftid']);
         if (index != -1) {
@@ -206,7 +210,9 @@ const createShiftEvents = async (shiftIds, shiftData, accessToken) => {
     });
 
     // Define the API endpoint for creating an event
-    const calendarApiUrl = 'https://www.googleapis.com/calendar/v3/calendars/primary/events';
+    //const calendarApiUrl = 'https://www.googleapis.com/calendar/v3/calendars/primary/events';
+    const calendarApiUrl = 'https://www.googleapis.com/calendar/v3/calendars/';
+    const calendarId = getCalendarId(calendarName, accessToken);
 
     const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
     // Set up the request headers
@@ -218,7 +224,7 @@ const createShiftEvents = async (shiftIds, shiftData, accessToken) => {
     chrome.runtime.sendMessage({ action: 'startUploadingEvents' });
     for (const shiftData of shiftDataToAddToCalendar) {
         // Make a POST request to create the event
-        fetch(calendarApiUrl, {
+        fetch(calendarApiUrl + `${calendarId}/events`, {
             method: 'POST',
             headers,
             body: JSON.stringify(shiftData),
