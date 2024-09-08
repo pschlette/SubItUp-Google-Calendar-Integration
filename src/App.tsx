@@ -1,8 +1,8 @@
 /// <reference types="chrome"/>
 
-import { AbsoluteCenter, Alert, AlertIcon, Box, Button, Card, CardBody, CardHeader, Center, Checkbox, CircularProgress, Divider, Flex, Grid, Spinner, Stack, StackItem, Text } from "@chakra-ui/react";
-import { useState } from "react";
-import { CalendarIcon, CheckIcon, ChevronLeftIcon, ChevronRightIcon, InfoOutlineIcon, MinusIcon, SmallCloseIcon, StarIcon } from '@chakra-ui/icons';
+import { AbsoluteCenter, Alert, AlertIcon, AlertTitle, Box, Button, ButtonGroup, Card, CardBody, CardHeader, Center, Checkbox, CircularProgress, Divider, Flex, Grid, HStack, IconButton, Input, ListItem, OrderedList, Select, SimpleGrid, Spinner, Stack, StackItem, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react";
+import { SetStateAction, useState } from "react";
+import { ArrowBackIcon, ArrowForwardIcon, CalendarIcon, CheckIcon, ChevronLeftIcon, ChevronRightIcon, MinusIcon, SmallCloseIcon } from '@chakra-ui/icons';
 import "./App.css"
 
 
@@ -18,8 +18,21 @@ const testCreateEvent = () => {
 function App() {
   const [refresh, setRefresh] = useState(false);
   const [accessToken, setAccessToken] = useState('');
+  const [SubItUpPayload, setSubItUpPayload] = useState('');
   const [SubItUpEvents, setSubItUpEvents] = useState([]);
   const [uploadingEvents, setUploadingEvents] = useState(false);
+  const [currentDateIndex, setCurrentDateIndex] = useState(0);
+  const [currentDateRange, setCurrentDateRange] = useState("week");
+  const [actionCooldown, setActionCooldown] = useState(false);
+
+  const handleCooldown = () => {
+    if (!actionCooldown) {
+      setActionCooldown(true);
+      setTimeout(() => {
+        setActionCooldown(false);
+      }, 2500); // Cooldown period in milliseconds (e.g., 5000ms = 5 seconds)
+    }
+  };
 
   const refreshExtension = () => {
     setRefresh(!refresh);
@@ -29,6 +42,12 @@ function App() {
     setAccessToken(data.accessToken);
     if (data.shifts !== undefined) {
       setSubItUpEvents(data.shifts);
+      setCheckedShifts(data.shifts.filter((shift: { [x: string]: boolean; }) => shift['addToGoogleCalendar'] == true)
+        .map((shift: { [x: string]: any; }) => shift['shiftid']));
+    }
+    // Probably not necessary
+    if (data.SubItUpRequiredRequestBody !== undefined) {
+      setSubItUpPayload(data.SubItUpRequiredRequestBody);
     }
   });
 
@@ -40,6 +59,7 @@ function App() {
       } else {
         console.log("chrome.storage.local data cleared successfully.");
         setAccessToken('');
+        setSubItUpPayload(''); // Probably not necessary
         setSubItUpEvents([]);
         setCheckedShifts([]);
       }
@@ -67,7 +87,6 @@ function App() {
   });
 
   const MainApp = () => {
-
     const authorizationButton =
       <AbsoluteCenter axis='both'>
         <Text fontSize='2xl'>
@@ -124,11 +143,26 @@ function App() {
     const logoutButton = <Button colorScheme='red' onClick={logOut}>Logout</Button>
     if (SubItUpEvents.length === 0) {
       return (
-        <Grid>
+        <Grid gap={4}>
           <Center>
             <CircularProgress isIndeterminate color='green.300' />
           </Center>
-          <Text fontSize='2xl'>Please Navigate to SubItUp.com, log-in, refresh the page, and re-open the extension.</Text>
+          <Alert
+            status='info'
+            variant='subtle'
+            flexDirection='column'
+            alignItems='center'
+            justifyContent='center'
+            textAlign='center'
+            height='200px'>
+            <AlertTitle fontSize='2xl'>How To Fetch Shifts:</AlertTitle>
+            <OrderedList>
+              <ListItem fontSize='xl'>Navigate to SubItUp.com</ListItem>
+              <ListItem fontSize='xl'>Log in to SubItUp.com (If Not Already)</ListItem>
+              <ListItem fontSize='xl'>Refresh The Page (On My Calendar)</ListItem>
+              <ListItem fontSize='xl'>Re-open the extension.</ListItem>
+            </OrderedList>
+          </Alert>
           {logoutButton}
         </Grid>
       )
@@ -158,100 +192,230 @@ function App() {
 
 
     let shiftSelection = (
-      <Stack spacing={3}>
-        {SubItUpEvents.sort(
-          function (shift_a, shift_b) {
-            const dateA: any = parseDateString(shift_a['milstart']);
-            const dateB: any = parseDateString(shift_b['milstart']);
-
-            if (shift_a['addToGoogleCalendar'] == false) {
-              return 1;
-            }
-            return dateA - dateB;
-          }
-        ).map((shift) => (
-          <StackItem>
-            <Card variant={(shift['addToGoogleCalendar']) ? 'elevated' : 'filled'}>
-              <CardHeader>
-                <Checkbox
-                  size='lg'
-                  colorScheme='green'
-                  defaultChecked={
-                    false//shift['addToGoogleCalendar']
-                  }
-                  onChange={(e) => {
-                    let index = checkedShifts.indexOf(shift['shiftid']);
-                    if (index == -1 && e.target.checked) {
-                      setCheckedShifts(checkedShifts.concat([shift['shiftid']]));
-                    }
-                    else if (!e.target.checked) {
-                      setCheckedShifts(checkedShifts.filter((shiftid) => shiftid !== shift['shiftid']));
-                    }
-                  }}
-                >
-                  {shift['ShiftName']}
-                </Checkbox>
-              </CardHeader>
-              <CardBody>
-                <Stack>
-                  <StackItem>
-                    <ChevronRightIcon />{shift['Title']}<ChevronLeftIcon />
-                  </StackItem>
-                  <StackItem>
-                    <Box bg={(shift['addToGoogleCalendar']) ? 'green.100' : 'red.100'}>
-                      {"Is this shift assigned to you? "}
-                      {(shift['addToGoogleCalendar']) ? <CheckIcon /> : <SmallCloseIcon />}
-                    </Box>
-                  </StackItem>
-                  <StackItem>
-                    <CalendarIcon />
-                    {"  "}
-                    {shift['milend']}
-                    {" "}
-                    <MinusIcon />
-                    {" "}
-                    {shift['milstart']}
-                  </StackItem>
-                </Stack>
-              </CardBody>
-            </Card>
-
-          </StackItem>
-        ))
+      <>
+        {
+          /*
+          <Stack spacing={5} direction='row'>
+            <Button onClick={() => {
+              let newCheckedShifts: SetStateAction<never[]> = [];
+              SubItUpEvents.forEach((shift, idx, arr) => {
+                if (shift['addToGoogleCalendar'] == true) {
+                  newCheckedShifts = checkedShifts.concat([shift['shiftid']]);
+                }
+              })
+              setCheckedShifts(newCheckedShifts);
+              //refreshExtension();
+            }}>Check All Assigned Shifts</Button>
+          </Stack>
+          */
         }
-      </Stack >
+        <Stack spacing={3}>
+          {SubItUpEvents.sort(
+            function (shift_a, shift_b) {
+              const dateA: any = parseDateString(shift_a['milstart']);
+              const dateB: any = parseDateString(shift_b['milstart']);
+
+              if (shift_a['addToGoogleCalendar'] == false) {
+                return 1;
+              }
+              return dateA - dateB;
+            }
+          ).map((shift, idx) => (
+            <StackItem>
+              <Card variant={(shift['addToGoogleCalendar']) ? 'elevated' : 'filled'}>
+                <CardHeader>
+                  <Checkbox
+                    size='lg'
+                    colorScheme='green'
+                    defaultChecked={
+                      shift['addToGoogleCalendar']
+                    }
+                    onChange={(e) => {
+                      let index = checkedShifts.indexOf(shift['shiftid']);
+                      if (index == -1 && e.target.checked) {
+                        setCheckedShifts(checkedShifts.concat([shift['shiftid']]));
+                      }
+                      else if (!e.target.checked) {
+                        setCheckedShifts(checkedShifts.filter((shiftid) => shiftid !== shift['shiftid']));
+                      }
+                    }}
+                  >
+                    {shift['ShiftName']}
+                  </Checkbox>
+                </CardHeader>
+                <CardBody>
+                  <Stack>
+                    <StackItem>
+                      <ChevronRightIcon />{shift['Title']}<ChevronLeftIcon />
+                    </StackItem>
+                    <StackItem>
+                      <Box bg={(shift['addToGoogleCalendar']) ? 'green.100' : 'red.100'}>
+                        {"Is this shift assigned to you? "}
+                        {(shift['addToGoogleCalendar']) ? <CheckIcon /> : <SmallCloseIcon />}
+                      </Box>
+                    </StackItem>
+                    <StackItem>
+                      <CalendarIcon />
+                      {"  "}
+                      {shift['milend']}
+                      {" "}
+                      <MinusIcon />
+                      {" "}
+                      {shift['milstart']}
+                    </StackItem>
+                  </Stack>
+                </CardBody>
+              </Card>
+
+            </StackItem>
+          ))
+          }
+        </Stack >
+      </>
     )
+
+    let getBounds = (type: string, index: number) => {
+      let date = new Date();
+      const result = { startDate: new Date(date), endDate: new Date(date) };
+
+      switch (type) {
+        case 'day':
+          result.startDate.setDate(result.startDate.getDate() + index);
+          result.endDate.setDate(result.endDate.getDate() + index);
+          break;
+        case 'week':
+          const currentDay = result.startDate.getDay();
+          result.startDate.setDate(result.startDate.getDate() - currentDay + (index * 7));
+          result.endDate.setDate(result.endDate.getDate() + (6 - currentDay) + (index * 7));
+          break;
+        case 'month':
+          const currentMonth = result.startDate.getMonth();
+          result.startDate.setMonth(currentMonth + index, 1);
+          result.endDate.setMonth(currentMonth + index + 1, 0);
+          break;
+        default:
+          throw new Error('Invalid type. Use "day", "week", or "month".');
+      }
+
+      const stringResult = { startDate: result.startDate.toLocaleDateString('en-US'), endDate: result.endDate.toLocaleDateString('en-US') }
+
+      return stringResult;
+    }
+
+
+    let mainApp = (<>
+
+      <Center>
+        <HStack spacing={2} direction='row'>
+          <IconButton
+            icon={<ArrowBackIcon />}
+            aria-label="Back"
+            colorScheme="teal"
+            isDisabled={actionCooldown}
+            onClick={() => {
+              setCurrentDateIndex(currentDateIndex - 1);
+              handleCooldown();
+              chrome.runtime.sendMessage({ action: 'refreshShifts', dateSettings: { range: currentDateRange, index: currentDateIndex - 1 } });
+            }}
+          />
+          <Box p="4" borderWidth="1px" borderRadius="lg">
+            <Text fontSize="lg" fontWeight="bold">
+              {getBounds(currentDateRange, currentDateIndex).startDate} - {getBounds(currentDateRange, currentDateIndex).endDate}
+            </Text>
+          </Box>
+          <IconButton
+            icon={<ArrowForwardIcon />}
+            aria-label="Forward"
+            colorScheme="teal"
+            isDisabled={actionCooldown}
+            onClick={() => {
+              setCurrentDateIndex(currentDateIndex + 1);
+              handleCooldown();
+              chrome.runtime.sendMessage({ action: 'refreshShifts', dateSettings: { range: currentDateRange, index: currentDateIndex + 1 } });
+            }}
+          />
+        </HStack>
+      </Center>
+
+      <Box position='relative' padding='4'>
+        <Divider />
+        <AbsoluteCenter bg='white' px='1'>
+          Shifts
+        </AbsoluteCenter>
+      </Box>
+      {shiftSelection}
+      < Center height='50px' >
+        <Divider orientation='vertical' />
+      </Center >
+      {submitButton}
+      < Center height='50px' >
+        <Divider orientation='vertical' />
+      </Center >
+      {logoutButton}
+    </>
+    )
+
     return (
       <Grid>
         <Alert status='info'>
           <AlertIcon />
-          Darkened Shifts are Availabe Shifts! (Not Taken).
+          Darkened Shifts are Available Shifts! (Not Taken).
         </Alert>
 
-        <Box position='relative' padding='10'>
+        <Box position='relative' padding='4'>
           <Divider />
-          <AbsoluteCenter bg='white' px='4'>
-            Shifts This Week
+          <AbsoluteCenter bg='white' px='1'>
+            Change Date Range
           </AbsoluteCenter>
         </Box>
-
-        {shiftSelection}
-        <Center height='50px'>
-          <Divider orientation='vertical' />
-        </Center>
-        {submitButton}
-        <Center height='50px'>
-          <Divider orientation='vertical' />
-        </Center>
-        {logoutButton}
-      </Grid>
+        <Tabs variant='soft-rounded' colorScheme='green' defaultIndex={1} isFitted
+          onChange={(index) => {
+            let type = "week";
+            switch (index) {
+              case 0:
+                setCurrentDateRange("day");
+                type = "day";
+                break;
+              case 1:
+                setCurrentDateRange("week");
+                type = "week";
+                break;
+              case 2:
+                setCurrentDateRange("month");
+                type = "month";
+                break;
+              default:
+                setCurrentDateRange("week");
+                break;
+            }
+            handleCooldown();
+            chrome.runtime.sendMessage({ action: 'refreshShifts', dateSettings: { range: type, index: currentDateIndex } });
+          }}>
+          <TabList>
+            <Tab isDisabled={actionCooldown}>Day</Tab>
+            <Tab isDisabled={actionCooldown}>Week</Tab>
+            <Tab isDisabled={actionCooldown}>Month</Tab>
+          </TabList>
+          <TabPanels>
+            <TabPanel>
+              {mainApp}
+            </TabPanel>
+            <TabPanel>
+              {mainApp}
+            </TabPanel>
+            <TabPanel>
+              {mainApp}
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
+      </Grid >
 
     );
   }
   return (
     <div className="App">
       {MainApp()}
-      <Text>{"This extension was made By Christopher Kim (christopher.kim.1@stonybrook.edu)"}</Text>
+      <Text>{"This extension was made By Christopher Kim (christopherkim2273@gmail.com)"}</Text>
     </div>
   );
 }
