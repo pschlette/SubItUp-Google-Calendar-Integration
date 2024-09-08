@@ -388,8 +388,9 @@ function App() {
                 setCurrentDateRange("week");
                 break;
             }
+            setCurrentDateIndex(0);
             handleCooldown();
-            chrome.runtime.sendMessage({ action: 'refreshShifts', dateSettings: { range: type, index: currentDateIndex } });
+            chrome.runtime.sendMessage({ action: 'refreshShifts', dateSettings: { range: type, index: 0 } });
           }}>
           <TabList>
             <Tab isDisabled={actionCooldown}>Day</Tab>
