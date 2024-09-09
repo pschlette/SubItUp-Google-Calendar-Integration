@@ -20,6 +20,7 @@ function App() {
   const [accessToken, setAccessToken] = useState('');
   const [SubItUpPayload, setSubItUpPayload] = useState('');
   const [SubItUpEvents, setSubItUpEvents] = useState([]);
+  const [SubItUpFirstLoad, setSubItUpFirstLoad] = useState(false);
   const [uploadingEvents, setUploadingEvents] = useState(false);
   const [currentDateIndex, setCurrentDateIndex] = useState(0);
   const [currentDateRange, setCurrentDateRange] = useState("week");
@@ -44,6 +45,7 @@ function App() {
       setSubItUpEvents(data.shifts);
       setCheckedShifts(data.shifts.filter((shift: { [x: string]: boolean; }) => shift['addToGoogleCalendar'] == true)
         .map((shift: { [x: string]: any; }) => shift['shiftid']));
+      setSubItUpFirstLoad(true);
     }
     // Probably not necessary
     if (data.SubItUpRequiredRequestBody !== undefined) {
@@ -61,6 +63,7 @@ function App() {
         setAccessToken('');
         setSubItUpPayload(''); // Probably not necessary
         setSubItUpEvents([]);
+        setSubItUpFirstLoad(false);
         setCheckedShifts([]);
       }
     });
@@ -141,7 +144,7 @@ function App() {
 
   const shiftsList = () => {
     const logoutButton = <Button colorScheme='red' onClick={logOut}>Logout</Button>
-    if (SubItUpEvents.length === 0) {
+    if (SubItUpFirstLoad !== true || SubItUpPayload === '') {
       return (
         <Grid gap={4}>
           <Center>
@@ -355,6 +358,7 @@ function App() {
     </>
     )
 
+    let tabReload = false;
     return (
       <Grid>
         <Alert status='info'>
@@ -364,12 +368,13 @@ function App() {
 
         <Box position='relative' padding='4'>
           <Divider />
-          <AbsoluteCenter bg='white' px='1'>
-            Change Date Range
+          <AbsoluteCenter bg='white'>
+            Change Date Range (Click Same Button to Refresh)
           </AbsoluteCenter>
         </Box>
         <Tabs variant='soft-rounded' colorScheme='green' defaultIndex={1} isFitted
           onChange={(index) => {
+            tabReload = true;
             let type = "week";
             switch (index) {
               case 0:
@@ -391,11 +396,31 @@ function App() {
             setCurrentDateIndex(0);
             handleCooldown();
             chrome.runtime.sendMessage({ action: 'refreshShifts', dateSettings: { range: type, index: 0 } });
+            tabReload = false;
           }}>
           <TabList>
-            <Tab isDisabled={actionCooldown}>Day</Tab>
-            <Tab isDisabled={actionCooldown}>Week</Tab>
-            <Tab isDisabled={actionCooldown}>Month</Tab>
+            <Tab onClick={() => {
+              /* MODULARIZE THIS */
+              if (!tabReload) {
+                setCurrentDateIndex(0);
+                handleCooldown();
+                chrome.runtime.sendMessage({ action: 'refreshShifts', dateSettings: { range: currentDateRange, index: 0 } });
+              }
+            }} isDisabled={actionCooldown}>Day</Tab>
+            <Tab onClick={() => {
+              if (!tabReload) {
+                setCurrentDateIndex(0);
+                handleCooldown();
+                chrome.runtime.sendMessage({ action: 'refreshShifts', dateSettings: { range: currentDateRange, index: 0 } });
+              }
+            }} isDisabled={actionCooldown}>Week</Tab>
+            <Tab onClick={() => {
+              if (!tabReload) {
+                setCurrentDateIndex(0);
+                handleCooldown();
+                chrome.runtime.sendMessage({ action: 'refreshShifts', dateSettings: { range: currentDateRange, index: 0 } });
+              }
+            }} isDisabled={actionCooldown}>Month</Tab>
           </TabList>
           <TabPanels>
             <TabPanel>
