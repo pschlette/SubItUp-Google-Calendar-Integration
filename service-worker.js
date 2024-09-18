@@ -144,7 +144,9 @@ const getCalendarId = async (calendarName, accessToken) => {
         .then((data) => {
             let calendars = data?.items;
             for (let calendar in calendars) {
+                calendar = calendars[calendar];
                 if (calendar?.summary === calendarName) {
+                    console.log("calendar found: ", calendar)
                     return calendar.id;
                 }
             }
@@ -152,10 +154,13 @@ const getCalendarId = async (calendarName, accessToken) => {
         })
         .catch((error) => {
             console.error('Error Retrieving Calendar:', error.message);
+            chrome.runtime.sendMessage({ action: 'loggedOut' });
             return undefined;
         })
-    if (calendarId)
+    if (calendarId) {
+        console.log("Found Calendar - ID: ", calendarId);
         return calendarId;
+    }
 
     let newCalendarData = {
         'summary': calendarName,  // Customize the calendar name
@@ -164,7 +169,7 @@ const getCalendarId = async (calendarName, accessToken) => {
     calendarId = await fetch(CALENDARS_URL, {
         method: 'POST',
         headers: headers,
-        body: newCalendarData
+        body: JSON.stringify(newCalendarData)
     }).then((response) => {
         if (!response.ok) {
             if (response.status == 401) {
@@ -176,10 +181,12 @@ const getCalendarId = async (calendarName, accessToken) => {
         return response.json();
     })
         .then((data) => {
+            console.log("Created new calendar! Name: ", calendarName);
             return data.id;
         })
         .catch((error) => {
             console.error('Error Creating New Calendar', error.message);
+            chrome.runtime.sendMessage({ action: 'loggedOut' });
             return undefined;
         })
 
@@ -215,11 +222,7 @@ const createShiftEvents = async (shiftIds, shiftData, accessToken) => {
     // Define the API endpoint for creating an event
     //const calendarApiUrl = 'https://www.googleapis.com/calendar/v3/calendars/primary/events';
     const calendarApiUrl = 'https://www.googleapis.com/calendar/v3/calendars/';
-    const calendarId = getCalendarId(calendarName, accessToken);
-
-    // TEST
-    chrome.runtime.sendMessage({ action: 'endUploadingEvents' });
-    return;
+    const calendarId = await getCalendarId(calendarName, accessToken);
 
     const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
     // Set up the request headers
@@ -253,6 +256,7 @@ const createShiftEvents = async (shiftIds, shiftData, accessToken) => {
             })
             .catch((error) => {
                 console.error('Error:', error.message);
+                chrome.runtime.sendMessage({ action: 'loggedOut' });
             });
         await sleep(2000);
     }
@@ -299,7 +303,10 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 .then((responseData) => {
                     responseData.forEach((element, index, array) => {
                         element['ShiftName'] = element['ShiftName'].replace('%2f', ' / ');
-                        if (element['noStaffAssigned'] == 'false') {
+                        let blockTitle = element['BlockTitle'].toLowerCase();
+                        if (element['noStaffAssigned'] == 'false' &&
+                            blockTitle.includes("working") &&
+                            !blockTitle.includes("available")) {
                             array[index]['addToGoogleCalendar'] = true;
                             array[index]['noStaffAssigned'] = false;
                         }
@@ -316,6 +323,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 })
                 .catch((error) => {
                     console.error("Error resending request:", error);
+
                 });
         });
     }
@@ -413,7 +421,10 @@ chrome.webRequest.onBeforeRequest.addListener(
                             .then((responseData) => {
                                 responseData.forEach((element, index, array) => {
                                     element['ShiftName'] = element['ShiftName'].replace('%2f', ' / ');
-                                    if (element['noStaffAssigned'] == 'false') {
+                                    let blockTitle = element['BlockTitle'].toLowerCase();
+                                    if (element['noStaffAssigned'] == 'false' &&
+                                        blockTitle.includes("working") &&
+                                        !blockTitle.includes("available")) {
                                         array[index]['addToGoogleCalendar'] = true;
                                         array[index]['noStaffAssigned'] = false;
                                     }
@@ -430,6 +441,7 @@ chrome.webRequest.onBeforeRequest.addListener(
                             })
                             .catch((error) => {
                                 console.error("Error resending request:", error);
+                                chrome.runtime.sendMessage({ action: 'loggedOut' });
                             });
                     }
                 }

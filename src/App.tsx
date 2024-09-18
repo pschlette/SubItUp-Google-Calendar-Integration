@@ -43,8 +43,8 @@ function App() {
     setAccessToken(data.accessToken);
     if (data.shifts !== undefined) {
       setSubItUpEvents(data.shifts);
-      setCheckedShifts(data.shifts.filter((shift: { [x: string]: boolean; }) => shift['addToGoogleCalendar'] == true)
-        .map((shift: { [x: string]: any; }) => shift['shiftid']));
+      //setCheckedShifts(data.shifts.filter((shift: { [x: string]: boolean; }) => shift['addToGoogleCalendar'] == true)
+      //.map((shift: { [x: string]: any; }) => shift['shiftid']));
       setSubItUpFirstLoad(true);
     }
     // Probably not necessary
@@ -65,6 +65,10 @@ function App() {
         setSubItUpEvents([]);
         setSubItUpFirstLoad(false);
         setCheckedShifts([]);
+        setUploadingEvents(false);
+        setCurrentDateIndex(0);
+        setCurrentDateRange("week");
+        setActionCooldown(false);
       }
     });
     refreshExtension();
@@ -136,11 +140,11 @@ function App() {
   */
 
   const addToGoogleCalendar = () => {
-    chrome.runtime.sendMessage({ action: 'uploadToGoogleCalendar', shiftIds: checkedShifts, shiftData: SubItUpEvents, token: accessToken });
+    if (checkedShifts.length > 0)
+      chrome.runtime.sendMessage({ action: 'uploadToGoogleCalendar', shiftIds: checkedShifts, shiftData: SubItUpEvents, token: accessToken });
   }
 
-  const [checkedShifts, setCheckedShifts] = useState(SubItUpEvents.filter((shift) => shift['addToGoogleCalendar'] == true)
-    .map((shift) => shift['shiftid']));
+  const [checkedShifts, setCheckedShifts] = useState([]); //SubItUpEvents.filter((shift) => shift['addToGoogleCalendar'] == true).map((shift) => shift['shiftid']));
 
   const shiftsList = () => {
     const logoutButton = <Button colorScheme='red' onClick={logOut}>Logout</Button>
@@ -194,7 +198,7 @@ function App() {
     }
 
 
-    let shiftSelection = (
+    let shiftSelection = SubItUpEvents.length === 0 ? <Text fontSize='xl'>No Shifts.</Text> : (
       <>
         {
           /*
@@ -230,15 +234,12 @@ function App() {
                   <Checkbox
                     size='lg'
                     colorScheme='green'
-                    defaultChecked={
-                      shift['addToGoogleCalendar']
-                    }
                     onChange={(e) => {
                       let index = checkedShifts.indexOf(shift['shiftid']);
-                      if (index == -1 && e.target.checked) {
+                      if (index == -1) {
                         setCheckedShifts(checkedShifts.concat([shift['shiftid']]));
                       }
-                      else if (!e.target.checked) {
+                      else {
                         setCheckedShifts(checkedShifts.filter((shiftid) => shiftid !== shift['shiftid']));
                       }
                     }}
@@ -359,6 +360,14 @@ function App() {
     )
 
     let tabReload = false;
+    let refreshSameTab = () => {
+      if (!tabReload) {
+        setCurrentDateIndex(0);
+        handleCooldown();
+        chrome.runtime.sendMessage({ action: 'refreshShifts', dateSettings: { range: currentDateRange, index: 0 } });
+      }
+    }
+
     return (
       <Grid>
         <Alert status='info'>
@@ -400,26 +409,13 @@ function App() {
           }}>
           <TabList>
             <Tab onClick={() => {
-              /* MODULARIZE THIS */
-              if (!tabReload) {
-                setCurrentDateIndex(0);
-                handleCooldown();
-                chrome.runtime.sendMessage({ action: 'refreshShifts', dateSettings: { range: currentDateRange, index: 0 } });
-              }
+              refreshSameTab();
             }} isDisabled={actionCooldown}>Day</Tab>
             <Tab onClick={() => {
-              if (!tabReload) {
-                setCurrentDateIndex(0);
-                handleCooldown();
-                chrome.runtime.sendMessage({ action: 'refreshShifts', dateSettings: { range: currentDateRange, index: 0 } });
-              }
+              refreshSameTab();
             }} isDisabled={actionCooldown}>Week</Tab>
             <Tab onClick={() => {
-              if (!tabReload) {
-                setCurrentDateIndex(0);
-                handleCooldown();
-                chrome.runtime.sendMessage({ action: 'refreshShifts', dateSettings: { range: currentDateRange, index: 0 } });
-              }
+              refreshSameTab();
             }} isDisabled={actionCooldown}>Month</Tab>
           </TabList>
           <TabPanels>
