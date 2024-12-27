@@ -261,11 +261,11 @@ function App() {
                     <StackItem>
                       <CalendarIcon />
                       {"  "}
-                      {shift['milend']}
+                      {shift['milstart']}
                       {" "}
                       <MinusIcon />
                       {" "}
-                      {shift['milstart']}
+                      {shift['milend']}
                     </StackItem>
                   </Stack>
                 </CardBody>
